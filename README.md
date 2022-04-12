@@ -17,6 +17,3 @@ Second,run this line open the file for output:
 ```
 spark-submit spark-submit clean_tax_climate.py datasets/environmental_tax_OECD.csv cleaned_datasets/cleaned_tax_climate.csv
 ```
-
-
-
