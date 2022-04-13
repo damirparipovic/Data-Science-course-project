@@ -15,20 +15,23 @@ from scipy import stats
 # Citation: https://stackoverflow.com/questions/50594613/how-to-plot-aggregated-by-date-pandas-dataframe
 
 
-# In[63]:
+# In[70]:
 
 
 # ----- Developed countried data in Organization of Economic Cooperation and Development (OECD) -----
 # ----- Pre-pandanmic data -------
+# ** Canadian cents per litre **
 
-# oil tax data cleaning, filtering:
-df_oil_international = pd.read_csv('datasets/internationalpumppricesall- all converted to Canadian cents per litre.csv')
+#1. oil tax data cleaning, filtering:
+df_oil_international = pd.read_csv('datasets/6countries_oil_price-CAD_cents_per_litre.csv')
 df_oil_international = df_oil_international.drop(columns = ['Financial Situation'])
 df_oil_international['Date'] = pd.to_datetime(df_oil_international['Date']) #convert to Date time object
 
 df_tax = df_oil_international[(df_oil_international['Tax Status'] == 'Tax')]
 df_tax = df_tax[(df_tax['Date'].dt.year <= 2019)]
 
+
+#2. ***** Not-yet normalized model *****
 
 #----- Histograms shows the Germany as well as EU commitee has much higher treshold for oil and gas tax When the climate change policy was ruled out (ADD Source: ).
 #----- USA oil tax has much lower oil tax rate comparing to Germany. And Japan oil tax rates r ate in the middle of these two countries'.
@@ -47,8 +50,22 @@ plt.title('Germany and USA Gas Tax 2012 - 2019')
 plt.legend(('USA', 'Germany'), loc = 'upper left')
 
 
+#3.H0: Are both Germany and the USA data normally-distributed?  We used T-test to determine it. The p-value is 3.849357578096492e-52 for the data of USA oil tax 
+# and p-value is 9.906815927253717e-16 for data of Germany oil tax. 
+#Obviously, both p-values reject the H0, so they are both not normal distributions.
+print("T-test USA p-val: ",stats.normaltest(df_tax['USA']).pvalue) # 3.849357578096492e-52
+print("T-test Germany p-val: ", stats.normaltest(df_tax['Germany']).pvalue) # 9.906815927253717e-16
 
-# Mann-Whitney U-test3
+
+#4. Levene equal variance test:
+# From the plot of original data, it looks like Germnay tax rates are more spread out than USA's. 
+# We use levene equal variance test to decide if they have different variances. 
+#Let's assume H0: they have equal variance. 
+#The result is true to what the plot looked like - they have different variances because p-value < 0.05 which means H0 is rejected.
+print("Leven p-value:", stats.levene(df_tax['USA'], df_tax['Germany']).pvalue) #1.1910589753871016e-08
+
+
+#5.
 
 
 # In[3]:
