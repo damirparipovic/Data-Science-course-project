@@ -20,7 +20,7 @@ from sklearn.linear_model import LinearRegression
 # In[20]:
 
 
-#PART A
+
 # oil tax data (monthly) cleaning, filtering:
 df_oil_international = pd.read_csv('datasets/6countries_oil_price-CAD_cents_per_litre.csv')
 df_oil_international = df_oil_international.drop(columns = ['Financial Situation'])
@@ -55,11 +55,37 @@ df_totalPrice
 # df_totalPrice_germany
 
 
-# In[27]:
+# In[77]:
+
+
+#PART A
+
+# https://ourworldindata.org/grapher/oil-consumption-by-country 
+# ==== We look at countries have most oil total consumption in main regions in the world. 
+# The sorted result shows the most consuming oil and gas in 1994 to 2019 countries are United States(North America), China(Asia Pacific), 
+# Germany(European Union), Brazil(South & Central America), Saudi Arabia(Middle East) and Egypt(Africa).
+
+consumption_df = pd.read_csv('datasets/ourworld-oil-consumption-by-region.csv')
+consumption_df = consumption_df.drop(columns = ['Code'])
+consumption_df = consumption_df[(consumption_df['Year'] >= 1994) & (consumption_df['Year'] <= 2019)]
+sum_df = consumption_df.groupby(consumption_df['Entity'])['Oil Consumption - TWh'].agg(['sum']).reset_index().rename(columns={'sum': 'Oil Consumption Total - TWh'})
+sum_df = sum_df.sort_values(by = 'Oil Consumption Total - TWh', axis = 0, ascending = False)
+
+#Put in report:
+consumption_times = (2.662660e+05/26) / (3.765799e+04/26) # mean USA / mean Germany = 7.070637599085878
+print("Times of USA to Germany total consumption: ", consumption_times)
+
+
+sum_df.head(30)
+
+
+# In[68]:
 
 
 # PART B
 # ----- Developed countried data in Organization of Economic Cooperation and Development (OECD), Pre-pandanmic data -----
+# The statistics above ranks the most oil consumption countries and region.  Under a finite range of datasets, we chose Germany(Europe) and USA(North America) to analyse their relationships of oil tax and energy contributed CO2 emission.
+
 # ** Canadian cents per litre **
 
 
@@ -104,7 +130,7 @@ print("Transformed Germany: ", stats.normaltest(squared_Germany_df).pvalue) #T-t
 print('Germany oil tax average of 2012 - 2019: ', df_tax['Germany'].mean()) #127.13437499999998
 print('USA oil tax average of 2012 - 2019: ', df_tax['USA'].mean()) # 14.241666666666662
 
-germany_tax_mean = df_tax.groupby(df_tax['Date'].dt.year)['Germany'].agg('mean').reset_index()
+# germany_tax_mean = df_tax.groupby(df_tax['Date'].dt.year)['Germany'].agg('mean').reset_index()
 
 
 
@@ -115,7 +141,6 @@ utest, p_value = stats.mannwhitneyu(df_tax['USA'], df_tax['Germany'], alternativ
 # Also, the mean values is 9 times different, so it backs up that their distributions are further apart.
 
 print("Mann-Whitney U-test p-value: ", utest, p_value) 
-
 
 
 
@@ -133,18 +158,20 @@ plt.ylabel('Quantity by month')
 plt.title('Germany and USA Oil and Gas Tax 2012 - 2019', fontsize= 16)
 plt.legend(('USA', 'Germany'), loc = 'upper left')
 
-germany_tax_mean['Date'].astype(int)
 
 
-# In[38]:
+# In[81]:
 
 
 #PART C
+#Since the limitation of comparing the correlation of oil tax rate and CO2 emission, 
+#we'll look the trend of Germany and USA CO2 emission from 1975 to 2018 by predicting linear regression:
 # -------> Question: Is high oil tax in effect on reducing Gas emission(CO2) in Germany? 
 # -------> In contrast, does the stable low oil tax keep Gas emission more in USA?
 # Data source: World Bank
 
-#1. ----------- cleanup, transpose data
+#1. ----------- cleanup, transpose data:
+
 df_climate = pd.read_csv('datasets/climatechange1.csv')
 df_climate = df_climate.drop(columns = (["Country Code", 'Series Code']))
 # Germany:
@@ -155,26 +182,50 @@ df_climate_germany = df_climate_germany.drop(columns = ['Country Name', 'Series 
 #USA:
 df_climate_usa = df_climate[(df_climate['Country Name'] == 'United States')]
 df_climate_usa = df_climate_usa[(df_climate_usa['Series Name'] == 'Total greenhouse gas emissions (kt of CO2 equivalent)')]
+df_climate_usa = df_climate_usa.drop(columns = ['Country Name', 'Series Name'])
 
 
 #2.transpose columns to rows, re-create new dataframe:
-df_emission_germany = df_climate_germany.transpose().rename(columns = {9284 : 'CO2_emission(kt)'}) 
+
+#Germany:
+df_emission_germany = df_climate_germany.transpose().rename(columns = {9284 : 'Total_CO2_emission(kt)'}) 
 df_emission_germany = df_emission_germany.reset_index(level = 0).rename(columns={'index': 'Year'})
 
+#USA:
+df_emission_usa = df_climate_usa.transpose().rename(columns = {26175 : 'Total_CO2_emission(kt)'}) 
+df_emission_usa = df_emission_usa.reset_index(level = 0).rename(columns={'index': 'Year'})
 
-#convert object to integer, float:
+
+#3.convert object to integer, float:
+#Germany:
 df_emission_germany['Year'] = df_emission_germany['Year'].astype(int) 
 df_emission_germany = df_emission_germany[(df_emission_germany['Year'] >= 1975) & (df_emission_germany['Year'] <= 2018)]
 
-df_emission_germany['CO2_emission(kt)'] = df_emission_germany['CO2_emission(kt)'].astype(float)
+df_emission_germany['Total_CO2_emission(kt)'] = df_emission_germany['Total_CO2_emission(kt)'].astype(float)
 
-#display
+
+#USA:
+df_emission_usa['Year'] = df_emission_usa['Year'].astype(int) 
+df_emission_usa = df_emission_usa[(df_emission_usa['Year'] >= 1975) & (df_emission_usa['Year'] <= 2018)]
+
+df_emission_usa['Total_CO2_emission(kt)'] = df_emission_usa['Total_CO2_emission(kt)'].astype(float)
+
+#sort
 df_emission_germany = df_emission_germany.sort_values(by = ['Year'], ascending = True)
+df_emission_usa = df_emission_usa.sort_values(by = ['Year'], ascending = True)
+
+# concat_emission = pd.concat([df_emission_germany, df_emission_usa], axis = 1).reindex(df_emission_usa.index)
+
+#4.Linear regression - CO2 Emission VS years:
+#Germany:
+fit_germany_CO2 = stats.linregress(df_emission_germany['Year'], df_emission_germany['Total_CO2_emission(kt)'])
+df_emission_germany['prediction'] = df_emission_germany['Year']*fit_germany_CO2.slope + fit_germany_CO2.intercept 
+
+#USA:
+fit_usa_CO2 = stats.linregress(df_emission_usa['Year'], df_emission_usa['Total_CO2_emission(kt)'])
+df_emission_usa['prediction'] = df_emission_usa['Year']*fit_usa_CO2.slope + fit_usa_CO2.intercept 
 
 
-#3.Linear regression - CO2 Emission VS years:
-fit_Germany_CO2 = stats.linregress(df_emission_germany['Year'], df_emission_germany['CO2_emission(kt)'])
-df_emission_germany['prediction'] = df_emission_germany['Year']*fit_Germany_CO2.slope + fit_Germany_CO2.intercept 
 
 #4.Linear regression - CO2 Emission VS Oil tax rate:
 # fit_germany_tax = stats.linregress(df_tax['Date'], df_tax['Germany'])
@@ -185,22 +236,35 @@ df_emission_germany['prediction'] = df_emission_germany['Year']*fit_Germany_CO2.
 
 
                                    
-                                   
-#4.plot
+#5.plot
+# Germany: - downward
 plt.figure(figsize=(12, 8), dpi=80)
-plt.plot(df_emission_germany['Year'], df_emission_germany['CO2_emission(kt)'], 'b.', alpha = 0.5) 
-plt.plot(df_emission_germany['Year'], df_emission_germany['prediction'], 'r-', linewidth = 2)
-plt.title('CO2 Emission(kt) Trend from 1975 to 2018')
+plt.plot(df_emission_germany['Year'], df_emission_germany['Total_CO2_emission(kt)'], 'b.', alpha = 1) 
+plt.plot(df_emission_germany['Year'], df_emission_germany['prediction'], 'r-', linewidth = 1)
+plt.title('Germany CO2 Emission(kt) Trend from 1975 to 2018')
 plt.xlabel('Year')
 plt.ylabel('CO2 Emission(kt)')
 
-df_emission_germany
-# pd.set_option('display.max_columns', None)
-# pd.set_option('display.max_rows', None)
+#USA: - upward
+plt.figure(figsize=(12, 8), dpi=80)
+plt.plot(df_emission_usa['Year'], df_emission_usa['Total_CO2_emission(kt)'], 'b.', alpha = 1) 
+plt.plot(df_emission_usa['Year'], df_emission_usa['prediction'], 'r-', linewidth = 1)
+plt.title('USA CO2 Emission(kt) Trend from 1975 to 2018')
+plt.xlabel('Year')
+plt.ylabel('CO2 Emission(kt)')
 
 
-#As we can see from these two different linear regression, the trend of total CO2 can definately predict that Germany's tax has been steadly increasing and USA's tax has not been changed much since 1970s   
+#6.CO2 Emission mean and median:
+
+emission_times_mean = df_emission_usa['Total_CO2_emission(kt)'].mean() / df_emission_germany['prediction'].mean()
+
+print(emission_times_mean, fit_germany_CO2.slope)
+#----As we can see from these two different linear regression, the trend of total CO2 can definately predict that Germany's tax has been steadly increasing and USA's tax has not been changed much since 1970s   
 #even though we only have limited oil tax data points from 2012 - 2019 to confirm this.
+
+#More consumption, more emission. Average of total consumption of USA is 7 times higher than Germany's, so the average CO2 emission of USA is 5.7 times higher than the Germany's.
+#It's fair to know that they create a positive correlation. Yet, Germany's emission is decreasing dramatically with slope .....,  
+#it concludes that high oil tax has been in effect on encouraging less consumption, then less emission in the country.
 
 
 # In[ ]:
