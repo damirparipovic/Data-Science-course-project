@@ -3,6 +3,8 @@
 - To setup programming runs, Python 3.5+, Jupyter Notebook, and PySpark are required to install on your machine.
 - You need to import python libraries before running the programs. These are numpy, pandas, matplotlib, datetime, seaborn, scipy, sklearn libraries. (See syntax in Libraries section)
 
+- There are multiple coding environments able to run .ipynb files. You can choose such as Anaconda or Visual Studio.
+
 
 ### Libraries:
 
@@ -18,8 +20,13 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 ```
 
+### Running files:
+
+Files with .ipynb can run in Jupyter Notebook directly. Files with .py can run in Terminal.
+
+
 ### Running Spark jobs
-The PySpark is should in Linux-like environment. First, open the terminal(command-prompt), copy and paste these lines:
+The PySpark should be running in Linux-like environment. First, open the terminal(command-prompt), copy and paste these lines:
 
 ```
 PATH=/usr/shared/CMPT/big-data/spark-3.1.2-bin-hadoop3.2/bin/:${PATH}
