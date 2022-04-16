@@ -9,31 +9,30 @@ import pandas as pd
 import sys #python3 
 import matplotlib.pyplot as plt
 import datetime
-import seaborn as sns
+
 from scipy import stats
 from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 
-# Citation: https://stackoverflow.com/questions/50594613/how-to-plot-aggregated-by-date-pandas-dataframe
+#python3 oil_tax_1.py datasets/ourworld-oil-consumption-by-region.csv datasets/6countries_oil_price-CAD_cents_per_litre.csv datasets/greenhouseCO2-worldbank.csv
+
+# filename1 = sys.argv[1]
+# filename2 = sys.argv[2]
+# filename3 = sys.argv[3]
 
 
-# In[217]:
-
-
-
-
-
-# In[226]:
+# In[2]:
 
 
 #PART A
 
 # https://ourworldindata.org/grapher/oil-consumption-by-country 
-# ==== We look at countries have most oil total consumption in main regions in the world. 
-# The sorted result shows the most consuming oil and gas in 1994 to 2019 countries are United States(North America), China(Asia Pacific), 
-# Germany(European Union), Brazil(South & Central America), Saudi Arabia(Middle East) and Egypt(Africa).
+# ==== We look at countries have most oil consumption in main regions in the world. 
+# The sorted result shows the top 10 most consuming oil in 1994 to 2019 countries
+
 
 consumption_df = pd.read_csv('datasets/ourworld-oil-consumption-by-region.csv')
+# consumption_df = pd.read_csv(filename1)
 consumption_df = consumption_df.drop(columns = ['Code'])
 consumption_df = consumption_df[(consumption_df['Year'] >= 1994) & (consumption_df['Year'] <= 2019)]
 sum_df = consumption_df.groupby(consumption_df['Entity'])['Oil Consumption - TWh'].agg(['sum']).reset_index().rename(columns={'sum': 'Oil Consumption Total - TWh','Entity': 'Country'})
@@ -44,7 +43,7 @@ consumption_times = (2.662660e+05/26) / (3.765799e+04/26) # mean USA / mean Germ
 print("Times of USA to Germany total consumption: ", consumption_times)
 
 sum_df = sum_df.reset_index(level = 0)
-sum_df = sum_df.drop([0,1,2,3,4,6,7,9,10,12,13]).reset_index(level = 0)
+sum_df = sum_df.drop([0,1,2,3,4,6,7,9,10,12,13]).reset_index(level = 0) #drop the world regoins
 sum_df = sum_df.drop(columns = ['level_0'])
 sum_df = sum_df.rename(columns = {'index': 'Rank'})
 sum_df['Rank'] = sum_df.index + 1
@@ -52,12 +51,13 @@ sum_df['Rank'] = sum_df.index + 1
 sum_df.head(10)
 
 
-# In[ ]:
+# In[3]:
 
 
 # Part B-1:
 # oil tax data (monthly) cleaning, filtering:
 df_oil_international = pd.read_csv('datasets/6countries_oil_price-CAD_cents_per_litre.csv')
+# df_oil_international = pd.read_csv(filename2)
 df_oil_international = df_oil_international.drop(columns = ['Financial Situation'])
 df_oil_international['Date'] = pd.to_datetime(df_oil_international['Date'])
 
@@ -83,8 +83,11 @@ plt.legend(('Germany', 'USA'), loc = 'upper left')
 
 # df_totalPrice_usa
 
+# df_oil_international
+# df_totalPrice_germany
 
-# In[230]:
+
+# In[4]:
 
 
 # PART B-2
@@ -97,6 +100,7 @@ plt.legend(('Germany', 'USA'), loc = 'upper left')
 
 #1. oil tax data cleaning, filtering:
 df_oil_international = pd.read_csv('datasets/6countries_oil_price-CAD_cents_per_litre.csv')
+# df_oil_international = pd.read_csv(filename2)
 df_oil_international = df_oil_international.drop(columns = ['Financial Situation'])
 df_oil_international['Date'] = pd.to_datetime(df_oil_international['Date']) #convert to Date time object
 
@@ -155,9 +159,7 @@ print("----> Germany mean normal test: ", germany_pvalue_clt) #pvalue=0.77531813
 #5. plot histogram
 #----- Histograms shows the Germany as well as EU commitee has much higher treshold for oil and gas tax When the climate change policy was ruled out (ADD Source: ).
 #----- USA oil tax has much lower oil tax rate comparing to Germany.
-# From the plot of original data, it looked like Germnay tax rates more spread out than USA's and it explains variance difference. 
 
-# plt.figure(figsize = (10, 5))
 
 plt.hist(df_tax['USA'], bins = 25, alpha = 0.5, color = 'red')
 plt.hist(df_tax['Germany'], bins = 25, alpha = 0.7, color = 'orange') #alpha = 70% opacity
@@ -167,6 +169,7 @@ plt.ylabel('Quantity by month')
 plt.title('Germany and USA Oil and Gas Tax 2012 - 2019', fontsize= 16)
 plt.legend(('USA', 'Germany'), loc = 'upper left')
 
+plt.savefig('usa_germany_oiltax.png')
 
 #6.Moving forward, we use Mann-whitney U-test to see if the USA oil tax rates are different to the Germany's.
 utest, p_value = stats.mannwhitneyu(df_tax['USA'], df_tax['Germany'], alternative = 'two-sided')
@@ -176,30 +179,32 @@ utest, p_value = stats.mannwhitneyu(df_tax['USA'], df_tax['Germany'], alternativ
 print("Mann-Whitney U-test, p-value: ", utest, p_value) 
 
 
-# In[229]:
+# In[5]:
 
 
 #7. Calculate oil tax of USA, and GERMANY mean:
 
-print('Germany oil tax average of 2012 - 2019: ', df_tax['Germany'].mean()) #127.13437499999998
-print('USA oil tax average of 2012 - 2019: ', df_tax['USA'].mean()) # 14.241666666666662
+print('Germany oil tax average of 2012 - 2019: ', df_tax['Germany'].mean()) #127.13437499999998 CAD
+print('USA oil tax average of 2012 - 2019: ', df_tax['USA'].mean()) # 14.241666666666662 CAD
 print('Oil tax times between two countries: ', df_tax['Germany'].mean() / df_tax['USA'].mean())
 #On average, Germany oil tax is 8.9 times higher than the USA's in 2012-2019.
 
 
-# In[138]:
+# In[6]:
 
 
 #PART C
-#Since the limitation of comparing the correlation of oil tax rate and CO2 emission, 
-#we'll look the trend of Germany and USA CO2 emission from 1975 to 2018 by predicting linear regression:
+#Since the limited data points in oil tax for looking at the correlation between oil tax and CO2 emission, 
+#we'll focus on the trend of Germany and USA CO2 emission from 1975 to 2018 by predicting linear regression:
 # -------> Question: Is high oil tax in effect on reducing gas emission(CO2) in Germany? 
 # In contrast, does the stable low oil tax keep Gas emission more in USA?
 # Data source: World Bank
 
 #1.cleanup, transpose data:
 
-df_climate = pd.read_csv('datasets/climatechange1.csv')
+df_climate = pd.read_csv('datasets/greenhouseCO2-worldbank.csv')
+# df_climate = pd.read_csv(filename3)
+
 df_climate = df_climate.drop(columns = (["Country Code", 'Series Code']))
 # Germany:
 df_climate_germany = df_climate[(df_climate['Country Name'] == 'Germany')]
@@ -244,7 +249,7 @@ df_emission_usa = df_emission_usa.sort_values(by = ['Year'], ascending = True)
 # concat_emission = pd.concat([df_emission_germany, df_emission_usa], axis = 1).reindex(df_emission_usa.index)
 
 
-#4.Linear regression - CO2 Emission VS years:
+#4.Linear regression - CO2 Emission from 1975 to 2018:
 #Germany:
 fit_germany_CO2 = stats.linregress(df_emission_germany['Year'], df_emission_germany['Total_CO2_emission(kt)'])
 df_emission_germany['prediction'] = df_emission_germany['Year']*fit_germany_CO2.slope + fit_germany_CO2.intercept 
@@ -253,31 +258,31 @@ df_emission_germany['prediction'] = df_emission_germany['Year']*fit_germany_CO2.
 fit_usa_CO2 = stats.linregress(df_emission_usa['Year'], df_emission_usa['Total_CO2_emission(kt)'])
 df_emission_usa['prediction'] = df_emission_usa['Year']*fit_usa_CO2.slope + fit_usa_CO2.intercept 
 
-print("Correlation of Germany CO2 emission: ", fit_germany_CO2.rvalue, "Slope of Germany CO2 emission:", fit_germany_CO2.slope)
-
-#4.Linear regression - CO2 Emission VS Oil tax rate:
-# fit_germany_tax = stats.linregress(df_tax['Date'], df_tax['Germany'])
-# df_tax_germany['prediction'] = df_tax['Year']*fit_germany_tax + fit_germany_tax.intercept
-
-# plt.plot(df_tax['Date'], df_tax['Germany'], 'b.', alpha = 0.5) 
-# plt.plot(df_tax['Date'], df_tax_germany['prediction'], 'r-', linewidth = 2)
+print("- Germany CO2 emission: correlation ", fit_germany_CO2.rvalue, "Slope ", fit_germany_CO2.slope)
+print("- USA CO2 emission: correlation ", fit_usa_CO2.rvalue, "Slope ", fit_usa_CO2.slope)
 
 
                                    
 #5.plot
-# Germany: - downward
-plt.figure(figsize=(12, 8), dpi=80)
-plt.plot(df_emission_germany['Year'], df_emission_germany['Total_CO2_emission(kt)'], 'b.', alpha = 1) 
-plt.plot(df_emission_germany['Year'], df_emission_germany['prediction'], 'r-', linewidth = 1)
-plt.title('Germany CO2 Emission(kt) Trend from 1975 to 2018')
-plt.xlabel('Year')
-plt.ylabel('CO2 Emission(kt)')
 
 #USA: - upward
-plt.figure(figsize=(12, 8), dpi=80)
+plt.figure(figsize=(8, 6), dpi=80)
 plt.plot(df_emission_usa['Year'], df_emission_usa['Total_CO2_emission(kt)'], 'b.', alpha = 1) 
 plt.plot(df_emission_usa['Year'], df_emission_usa['prediction'], 'r-', linewidth = 1)
 plt.title('USA CO2 Emission(kt) Trend from 1975 to 2018')
+plt.xlabel('Year')
+plt.ylabel('CO2 Emission(kt)')
+
+plt.savefig('usa_co2_emission.png')
+
+# Germany: - downward
+plt.figure(figsize=(8, 6), dpi=80)
+plt.plot(df_emission_germany['Year'], df_emission_germany['Total_CO2_emission(kt)'], 'b.', alpha = 1) 
+plt.plot(df_emission_germany['Year'], df_emission_germany['prediction'], 'r-', linewidth = 1)
+
+plt.savefig('germany_co2_emission.png')
+
+plt.title('Germany CO2 Emission(kt) Trend from 1975 to 2018')
 plt.xlabel('Year')
 plt.ylabel('CO2 Emission(kt)')
 
@@ -286,61 +291,34 @@ plt.ylabel('CO2 Emission(kt)')
 
 emission_times_mean = df_emission_usa['Total_CO2_emission(kt)'].mean() / df_emission_germany['prediction'].mean()
 print("CO2 emission times of USA to Germany (mean): ", emission_times_mean)
-
-#----As we can see from these two different linear regression, 
-#the trend of total CO2 can definately predict that Germany's tax has been steadly increasing and USA's tax has not been changed much since 1970s   
-#even though we only have limited oil tax data points from 2012 - 2019 to confirm this.
-
-#More consumption, more emission. It's fair to know that Average of total consumption of USA is 7 times higher than Germany's, so the average CO2 emission of USA is 5.7 times higher than the Germany's.
-#Yet, Germany's emission is decreasing dramatically with r-value -0.968, so it shows the emission has a strong and negative decreasing as year goes by, and the decreasing rate is 14272 kilo ton per year.
-#It concludes that high oil tax has been in effect on encouraging less consumption, then less emission in the country.
+print("Times of the slope of Germany to the slope of USA: ", fit_germany_CO2.slope / fit_usa_CO2.slope)
 
 
-# In[152]:
+
+# In[7]:
 
 
-#======  Heatmap for Oil price and Oil tax correlation =======
-sns.set()
-
-df_emission_germany_heatmap = df_emission_germany.drop(columns = 'prediction')
-# ger_emission = sns.load_dataset(df_emission_germany_heatmap) 
-# ger_emission = ger_emission.pivot('Year','CO2_emission')
-
-# sns.heatmap(df_emission_germany_heatmap)
-# plt.show()
-
-
-# In[228]:
-
-
-# =============== For Geo map:
+# =============== For Countries and pump prices:
 
 df_tax_5yr = df_tax[(df_tax['Date'].dt.year <= 2016) & (df_tax['Date'].dt.year >= 2012)] 
 df_tax_5yr #Units: Candaian Cents per litre
 
-
 usa_5yr = df_tax_5yr.groupby(df_tax_5yr['Date'].dt.year)['USA'].agg('mean').reset_index()
-canada_5yr = df_tax_5yr.groupby(df_tax_5yr['Date'].dt.year)['Canada'].agg('mean').reset_index().drop(columns = 'Date')
 
-usa_canada_5yr = pd.concat([usa_5yr, canada_5yr], axis = 1).reindex() 
-
-fit_usa_5yr = stats.linregress(usa_canada_5yr['Date'], usa_canada_5yr['USA'])
-usa_canada_5yr['prediction_usa'] = usa_canada_5yr['Date']*fit_usa_5yr.slope + fit_usa_5yr.intercept 
+# linear regression:
+fit_usa_5yr = stats.linregress(usa_5yr['Date'], usa_5yr['USA'])
+usa_5yr['prediction'] = usa_5yr['Date']*fit_usa_5yr.slope + fit_usa_5yr.intercept 
 
 print("R-value of USA oil tax mean(2012 - 2016): ", fit_usa_5yr.rvalue)
 print("Slope of USA oil tax mean(2012 - 2016): ", fit_usa_5yr.slope)
 
-#Plot U.S.A and Canada mean oil tax from 2012 to 2016
-plt.plot(usa_canada_5yr['Date'], usa_canada_5yr['USA'], 'b.', alpha = 1) 
-# plt.plot(usa_canada_5yr['Date'], usa_canada_5yr['Canada'], 'g.', alpha = 1)
-plt.plot(usa_canada_5yr['Date'], usa_canada_5yr['prediction_usa'], 'r-', linewidth = 1)
-plt.title('U.S.A and Canada oil tax mean from 2012 to 2016')
+#Plot U.S.A mean oil tax from 2012 to 2016
+plt.plot(usa_5yr['Date'], usa_5yr['USA'], 'b.', alpha = 1) 
+plt.plot(usa_5yr['Date'], usa_5yr['prediction'], 'r-', linewidth = 1)
+plt.title('U.S.A oil tax mean from 2012 to 2016')
 plt.xlabel('Year')
 plt.ylabel('U.S.A. oil tax mean (Units: Candaian Cents per litre)')
 
 
-# In[ ]:
-
-
-
+plt.savefig('usa_mean_2016.png')
 
