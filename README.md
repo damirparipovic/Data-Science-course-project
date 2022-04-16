@@ -20,17 +20,9 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 ```
 
-### Running Python with terminal:
-The python files require opening terminal to start the programs.
+### Running files:
 
-```
-
-```
-
-
-### Running Jupyter Notebook:
-The ipynb can be run in Jupyter Notebook directly.
-
+Files with .ipynb can run in Jupyter Notebook directly. Files with .py can run in Terminal.
 
 
 ### Running Spark jobs
