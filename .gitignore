@@ -1,2 +1,4 @@
 #ignore pictures
 *.png
+
+.ipynb_checkpoints
