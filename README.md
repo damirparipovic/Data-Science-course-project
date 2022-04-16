@@ -40,7 +40,7 @@ In datasets unzip original_tax_climate.csv.zip
 Second,run this line open the file for output:
 
 ```
-spark-submit clean_tax_climate.py datasets/original_tax_climate.csv output.csv
+spark-submit clean_tax_climate.py datasets/original_tax_climate.csv cleaned_tax_climate.csv
 ```
 The spark file is not necessary for the related notebook to work.
 
