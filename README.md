@@ -34,17 +34,23 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 export PYSPARK_PYTHON=python3
 ```
 
+In datasets unzip original_tax_climate.csv.zip
+
+
 Second,run this line open the file for output:
 
 ```
-spark-submit spark-submit clean_tax_climate.py datasets/environmental_tax_OECD.csv cleaned_datasets/cleaned_tax_climate.csv
+spark-submit clean_tax_climate.py datasets/original_tax_climate.csv output.csv
 ```
+The spark file is not necessary for the related notebook to work.
+
 
 ### Order of program execution
 run the following before any notebooks as follows:
 
+```
 python3 extract_gas_diesel_prices.py
-
+```
 
 
 ### Datasets
