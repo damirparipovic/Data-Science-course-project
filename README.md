@@ -1,7 +1,10 @@
+# Oil prices and taxes project
+The project was to collect data about oil prices and tax rates in different countries to search for correlations and extract insights from the data. 
+
 ## Setup:
 
-- To setup programming runs, Python 3.5+, Jupyter Notebook, and PySpark are required to install on your machine.
-- You need to import python libraries before running the programs. These are numpy, pandas, matplotlib, datetime, seaborn, scipy, sklearn libraries. (See syntax in Libraries section)
+- To execute the programs and view the Jupyter notebook you will need the following installed on your machine: Python 3.5+, Jupyter Notebook, and PySpark.
+- The following python libraries are required to run the python files and jupyter notebooks: numpy, pandas, matplotlib, datetime, seaborn, scipy, sklearn libraries. (See syntax in Libraries section)
 
 - There are multiple coding environments able to run .ipynb files. You can choose such as Anaconda or Visual Studio.
 
@@ -22,11 +25,11 @@ from sklearn.linear_model import LinearRegression
 
 ### Running files:
 
-Files with .ipynb can run in Jupyter Notebook directly. Files with .py can run in Terminal.
+Files ending with .ipynb can run in a Jupyter Notebook environment directly. Files ending with .py should be executed in a terminal.
 
 
 ### Running Spark jobs
-The PySpark should be running in Linux-like environment. First, open the terminal(command-prompt), copy and paste these lines:
+The PySpark job should be ran in Linux-like environment. First, open a terminal(command-prompt), then copy and paste these lines:
 
 ```
 PATH=/usr/shared/CMPT/big-data/spark-3.1.2-bin-hadoop3.2/bin/:${PATH}
@@ -54,4 +57,4 @@ python3 extract_gas_diesel_prices.py
 
 
 ### Datasets
-Datasets are stored in "Datasets" folder with
+Datasets used for the project are stored in "Datasets" folder.
