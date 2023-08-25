@@ -1,20 +1,26 @@
-# Oil prices and taxes project
-The project was to collect data about oil prices and tax rates in different countries to search for correlations and extract insights from the data. 
+# Oil Prices and Taxes Project
+This project focuses on collecting data regarding oil prices and tax rates from different countries. Our primary aim is to search for potential correlations and extract meaningful insights from the data.
 
-## Setup:
+## Prerequisites
 
-- To execute the programs and view the Jupyter notebook you will need the following installed on your machine: Python 3.5+, Jupyter Notebook, and PySpark.
-- The following python libraries are required to run the python files and jupyter notebooks: numpy, pandas, matplotlib, datetime, seaborn, scipy, scikit-learn libraries. (See syntax in Libraries section)
+### System Requirements:
+- **Python**: Version 3.5 or newer.
+- **Jupyter Notebook**
+- **PySpark**
 
-- There are multiple coding environments able to run .ipynb files. You can choose such as Anaconda or Visual Studio.
-
-
-### Libraries:
-
+### Python Libraries:
+Make sure to install the following Python libraries before running the program:
+```bash
+pip install numpy pandas matplotlib seaborn scipy scikit-learn
 ```
+
+**Note**: While there are various environments to run `.ipynb` files, such as Anaconda or Visual Studio, this guide assumes you're using Jupyter Notebook.
+
+## Libraries Syntax
+
+```python
 import numpy as np
 import pandas as pd
-import sys #python3 
 import matplotlib.pyplot as plt
 import datetime
 import seaborn as sns
@@ -23,38 +29,44 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 ```
 
-### Running files:
+## Execution Guidelines
 
-Files ending with .ipynb can run in a Jupyter Notebook environment directly. Files ending with .py should be executed in a terminal.
+### Running Jupyter Notebooks:
+- Files with `.ipynb` extension can be directly executed within the Jupyter Notebook environment.
 
+### Running Python Scripts:
+- For files with a `.py` extension, execute them via a terminal.
 
-### Running Spark jobs
-The PySpark job should be ran in Linux-like environment. First, open a terminal(command-prompt), then copy and paste these lines:
+### Running Spark Jobs:
 
+If you're operating in a Linux-like environment, follow these steps:
+
+1. Configure the environment variables:
+```bash
+   export PATH=/usr/shared/CMPT/big-data/spark-3.1.2-bin-hadoop3.2/bin/:${PATH}
+   export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+   export PYSPARK_PYTHON=python3
 ```
-PATH=/usr/shared/CMPT/big-data/spark-3.1.2-bin-hadoop3.2/bin/:${PATH}
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-export PYSPARK_PYTHON=python3
+
+2. Unzip the required dataset:
+```bash
+   unzip Datasets/original_tax_climate.csv.zip
 ```
 
-In datasets unzip original_tax_climate.csv.zip
-
-
-Second,run this line open the file for output:
-
+3. Execute the Spark job:
+```bash
+   spark-submit clean_tax_climate.py Datasets/original_tax_climate.csv cleaned_tax_climate.csv
 ```
-spark-submit clean_tax_climate.py datasets/original_tax_climate.csv cleaned_tax_climate.csv
-```
-The spark file is not necessary for the related notebook to work.
 
+**Note**: Executing the Spark job isn't mandatory for the related notebook to function.
 
-### Order of program execution
-run the following before any notebooks as follows:
+### Order of Execution:
 
-```
+Prior to running any notebooks, execute the following:
+```bash
 python3 extract_gas_diesel_prices.py
 ```
 
+## Datasets
 
-### Datasets
-Datasets used for the project are stored in "Datasets" folder.
+The datasets used for this project are located within the `Datasets` folder.
