@@ -4,7 +4,7 @@ The project was to collect data about oil prices and tax rates in different coun
 ## Setup:
 
 - To execute the programs and view the Jupyter notebook you will need the following installed on your machine: Python 3.5+, Jupyter Notebook, and PySpark.
-- The following python libraries are required to run the python files and jupyter notebooks: numpy, pandas, matplotlib, datetime, seaborn, scipy, sklearn libraries. (See syntax in Libraries section)
+- The following python libraries are required to run the python files and jupyter notebooks: numpy, pandas, matplotlib, datetime, seaborn, scipy, scikit-learn libraries. (See syntax in Libraries section)
 
 - There are multiple coding environments able to run .ipynb files. You can choose such as Anaconda or Visual Studio.
 
